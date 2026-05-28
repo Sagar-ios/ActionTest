@@ -1,4 +1,4 @@
-name: iOS Build
+name: iOS IPA Build
 
 on:
   workflow_dispatch:
@@ -20,11 +20,28 @@ jobs:
       - name: Show Xcode Version
         run: xcodebuild -version
 
-      - name: Build App
+      - name: Build Archive
         run: |
-          xcodebuild clean build \
+          xcodebuild clean archive \
           -project ToDos.xcodeproj \
           -scheme ToDos \
-          -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' \
+          -sdk iphoneos \
+          -archivePath build/ToDos.xcarchive \
           CODE_SIGNING_ALLOWED=NO
+
+      - name: Create IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/ToDos.xcarchive/Products/Applications/*.app Payload/
+          zip -r ToDos.ipa Payload
+
+      - name: Verify IPA
+        run: |
+          ls -la
+          file ToDos.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ToDos-IPA
+          path: ToDos.ipa
