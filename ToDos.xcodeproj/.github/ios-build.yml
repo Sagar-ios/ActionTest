@@ -26,20 +26,20 @@ jobs:
           -project ToDos.xcodeproj \
           -scheme ToDos \
           -sdk iphoneos \
-          -archivePath ${{ github.workspace }}/build/ToDos.xcarchive \
+          -archivePath build/ToDos.xcarchive \
           CODE_SIGNING_ALLOWED=NO
 
-      - name: Export IPA
+      - name: Create IPA
         run: |
-          mkdir -p ${{ github.workspace }}/build/Payload
-          cp -R ${{ github.workspace }}/build/ToDos.xcarchive/Products/Applications/ToDos.app \
-          ${{ github.workspace }}/build/Payload/
-
-          cd ${{ github.workspace }}/build
+          mkdir Payload
+          cp -R build/ToDos.xcarchive/Products/Applications/ToDos.app Payload
           zip -r ToDos.ipa Payload
+
+      - name: Verify IPA
+        run: ls -la
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: ToDos-IPA
-          path: build/ToDos.ipa
+          path: ToDos.ipa
