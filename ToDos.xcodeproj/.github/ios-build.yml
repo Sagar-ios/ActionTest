@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout Repository
@@ -20,39 +20,33 @@ jobs:
       - name: Show Xcode Version
         run: xcodebuild -version
 
-      - name: Build Archive
+      - name: Build App
         run: |
-          xcodebuild clean archive \
+          xcodebuild \
           -project ToDos.xcodeproj \
           -scheme ToDos \
           -configuration Release \
+          -sdk iphoneos \
           -destination generic/platform=iOS \
-          -archivePath build/ToDos.xcarchive \
-          CODE_SIGNING_ALLOWED=NO
+          build
+
+      - name: Find App
+        run: |
+          find ~/Library/Developer/Xcode/DerivedData -name "*.app"
 
       - name: Create IPA
         run: |
-          echo "Searching for .app file..."
-
-          find build/ToDos.xcarchive
-
-          APP_PATH=$(find build/ToDos.xcarchive -type d -name "*.app" | head -1)
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "ToDos.app" | head -1)
 
           echo "APP_PATH=$APP_PATH"
 
-          mkdir -p Payload
+          mkdir Payload
 
           cp -R "$APP_PATH" Payload/
 
           zip -r ToDos.ipa Payload
 
-          echo "IPA Details:"
           ls -lh ToDos.ipa
-
-      - name: Verify IPA
-        run: |
-          ls -la
-          file ToDos.ipa
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
