@@ -48,12 +48,6 @@ jobs:
         run: |
           security find-identity -v -p codesigning
 
-      - name: Check Signing Settings
-        run: |
-          xcodebuild -showBuildSettings \
-            -project ToDos.xcodeproj \
-            -scheme ToDos | grep -E "CODE_SIGN_STYLE|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER"
-
       - name: Install Provisioning Profile
         env:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
@@ -77,33 +71,11 @@ jobs:
           find "$HOME/Library/MobileDevice/Provisioning Profiles" \
             -name "*.mobileprovision"
 
-      - name: Dump Provisioning Profile
+      - name: Check Signing Settings
         run: |
-          PROFILE=$(find "$HOME/Library/MobileDevice/Provisioning Profiles" \
-            -name "*.mobileprovision" | head -1)
-
-          echo "PROFILE = $PROFILE"
-
-          security cms -D -i "$PROFILE" > profile.plist
-
-          echo "===== PROFILE NAME ====="
-          grep -A1 "<key>Name</key>" profile.plist || true
-
-          echo "===== PROFILE UUID ====="
-          grep -A1 "<key>UUID</key>" profile.plist || true
-
-          echo "===== TEAM IDENTIFIER ====="
-          grep -A5 "<key>TeamIdentifier</key>" profile.plist || true
-
-          echo "===== APPLICATION IDENTIFIER ====="
-          grep -A10 "application-identifier" profile.plist || true
-
-      - name: Show Build Settings
-        run: |
-          xcodebuild \
+          xcodebuild -showBuildSettings \
             -project ToDos.xcodeproj \
-            -scheme ToDos \
-            -showBuildSettings | grep -E \
+            -scheme ToDos | grep -E \
             "PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM|CODE_SIGN_STYLE|PROVISIONING_PROFILE"
 
       - name: Create ExportOptions.plist
@@ -115,9 +87,9 @@ jobs:
           <plist version="1.0">
           <dict>
               <key>method</key>
-              <string>development</string>
+              <string>app-store</string>
               <key>signingStyle</key>
-              <string>automatic</string>
+              <string>manual</string>
           </dict>
           </plist>
           EOF
@@ -129,11 +101,9 @@ jobs:
             -scheme ToDos \
             -configuration Release \
             -destination generic/platform=iOS \
-            -allowProvisioningUpdates \
             -archivePath build/ToDos.xcarchive \
-            DEVELOPMENT_TEAM=27JX9JH9ZM \
-            PRODUCT_BUNDLE_IDENTIFIER=com.swiftiedev.ToDoApp
-            
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
 
       - name: Export IPA
         run: |
@@ -144,7 +114,6 @@ jobs:
 
       - name: Verify IPA
         run: |
-          echo "Exported files:"
           ls -lah build/export
 
       - name: Upload IPA
