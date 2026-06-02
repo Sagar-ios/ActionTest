@@ -66,27 +66,13 @@ jobs:
           cp "$PROFILE_PATH" \
             "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
 
-      - name: Dump Provisioning Profile
-        run: |
-          PROFILE=$(find "$HOME/Library/MobileDevice/Provisioning Profiles" -name "*.mobileprovision" | head -1)
-
-          echo "PROFILE = $PROFILE"
-
-          security cms -D -i "$PROFILE" > profile.plist
-
-          echo "===== PROFILE NAME ====="
-          grep -A1 "<key>Name</key>" profile.plist || true
-
-          echo "===== APPLICATION IDENTIFIER ====="
-          grep -A10 "application-identifier" profile.plist || true
-
       - name: Show Build Settings
         run: |
           xcodebuild \
             -project ToDos.xcodeproj \
             -scheme ToDos \
             -showBuildSettings | grep -E \
-            "PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM|CODE_SIGN_STYLE|PROVISIONING_PROFILE|PROVISIONING_PROFILE_SPECIFIER"
+            "PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM|CODE_SIGN_STYLE|CODE_SIGN_IDENTITY|PROVISIONING_PROFILE"
 
       - name: Create ExportOptions.plist
         run: |
@@ -112,7 +98,9 @@ jobs:
             -configuration Release \
             -destination generic/platform=iOS \
             -archivePath build/ToDos.xcarchive \
+            PRODUCT_BUNDLE_IDENTIFIER=com.swiftiedev.ToDoApp \
             CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }} \
             PROVISIONING_PROFILE_SPECIFIER="CICD"
 
