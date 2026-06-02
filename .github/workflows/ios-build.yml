@@ -48,6 +48,12 @@ jobs:
         run: |
           security find-identity -v -p codesigning
 
+      - name: Check Signing Settings
+        run: |
+          xcodebuild -showBuildSettings \
+            -project ToDos.xcodeproj \
+            -scheme ToDos | grep -E "CODE_SIGN_STYLE|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER"
+
       - name: Install Provisioning Profile
         env:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
