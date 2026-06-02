@@ -83,9 +83,19 @@ jobs:
           <plist version="1.0">
           <dict>
               <key>method</key>
-              <string>app-store</string>
+              <string>app-store-connect</string>
+
               <key>signingStyle</key>
               <string>manual</string>
+
+              <key>teamID</key>
+              <string>${{ secrets.DEVELOPMENT_TEAM }}</string>
+
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.swiftiedev.ToDoApp</key>
+                  <string>CICD</string>
+              </dict>
           </dict>
           </plist>
           EOF
@@ -113,6 +123,7 @@ jobs:
 
       - name: Verify IPA
         run: |
+          echo "Exported files:"
           ls -lah build/export
 
       - name: Upload IPA
