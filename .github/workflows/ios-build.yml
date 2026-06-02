@@ -66,9 +66,6 @@ jobs:
           cp "$PROFILE_PATH" \
             "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
 
-          echo "Installed profile:"
-          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles"
-
       - name: Show Installed Profiles
         run: |
           find "$HOME/Library/MobileDevice/Provisioning Profiles" \
@@ -127,7 +124,6 @@ jobs:
             -configuration Release \
             -destination generic/platform=iOS \
             -archivePath build/ToDos.xcarchive \
-            -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=27JX9JH9ZM \
             PRODUCT_BUNDLE_IDENTIFIER=com.swiftiedev.ToDoApp
 
